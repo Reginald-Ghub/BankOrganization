@@ -10,11 +10,15 @@ package bankorganization;
  */
 public class BankOrganization {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        // TODO code application logic here
-    }
-    
+// Enum representing the available menu options in the console program.
+// Using an enum enforces clear option names and makes menu code easier to maintain.   
+public enum MenuOption {
+    ADD_EMPLOYEE,        // Option to add a new employee manually
+    GENERATE_RANDOM,     // Option to generate random employees
+    SORT_APPLICANTS,     // Option to sort names from Applicants_Form.txt
+    SEARCH,              // Option to search for an employee by name
+    DISPLAY_ALL,         // Option to display all stored employees
+    EXIT                 // Option to exit the program
+}
+
 }
