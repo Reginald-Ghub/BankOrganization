@@ -60,6 +60,41 @@ public class InputValidator {
             }
         }
     }
+    
+    // Simple data class representing a bank department.
+public class Department {
+    private int id;           // unique id for the department
+    private String name;      // human-readable name (e.g., "Customer Service")
+    private String description; // short description of responsibilities
+
+    // Constructor to initialize department fields
+    public Department(int id, String name, String description) {
+        this.id = id;                 // set id
+        this.name = name;             // set name
+        this.description = description; // set description
+    }
+
+    // Getter for id
+    public int getId() {
+        return id;
+    }
+
+    // Getter for name
+    public String getName() {
+        return name;
+    }
+
+    // Getter for description
+    public String getDescription() {
+        return description;
+    }
+
+    // toString returns the department name for easy display
+    @Override
+    public String toString() {
+        return name;
+    }
+}
 }
 
 }
