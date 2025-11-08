@@ -4,6 +4,7 @@
  */
 package bankorganization;
 import java.util.Scanner; // Scanner used for console input
+import java.util.Random; // Random used to pick names
 
 /**
  *
@@ -160,4 +161,87 @@ class TeamLead extends Manager {
         super(id, "Team Lead", name, 1); // level 1 for team lead
     }
 }
+// Employee class represents each staff member in the bank organization.
+// Each employee has an ID, name, assigned manager, and department.
+class Employee {
+    private int id;                  // unique ID for the employee
+    private String name;             // employee name
+    private Manager manager;         // assigned manager role (Head, Assistant, or Team Lead)
+    private InputValidator.Department department; // assigned department (nested from InputValidator)
+
+    // Constructor initializes all fields when creating an employee
+    public Employee(int id, String name, Manager manager, InputValidator.Department department) {
+        this.id = id;               // store employee ID
+        this.name = name;           // store employee name
+        this.manager = manager;     // store assigned manager type
+        this.department = department; // store assigned department
+    }
+
+    // Getter for employee ID
+    public int getId() {
+        return id;
+    }
+
+    // Getter for employee name
+    public String getName() {
+        return name;
+    }
+
+    // Getter for assigned manager
+    public Manager getManager() {
+        return manager;
+    }
+
+    // Getter for assigned department
+    public InputValidator.Department getDepartment() {
+        return department;
+    }
+
+    // Setter for employee name (in case of edits)
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    // Setter for manager role
+    public void setManager(Manager manager) {
+        this.manager = manager;
+    }
+
+    // Setter for department
+    public void setDepartment(InputValidator.Department department) {
+        this.department = department;
+    }
+
+    // toString method to return a readable employee summary for display
+    @Override
+    public String toString() {
+        return String.format("Employee ID: %d | Name: %s | Manager: %s | Department: %s",
+                id, name, manager.getTitle(), department.getName());
+    }
+}
+
+// Utility to generate random first and last name combinations.
+public class RandomNameGenerator {
+
+    // Small arrays of sample first and last names for generating test data
+    private static final String[] FIRST_NAMES = {
+            "John", "Jane", "Alice", "Bob", "Carol", "David", "Emma", "Frank",
+            "Grace", "Harry", "Ivy", "Jack", "Lily", "Mike", "Nina", "Oscar"
+    };
+
+    private static final String[] LAST_NAMES = {
+            "Smith", "Johnson", "Williams", "Brown", "Jones", "Miller",
+            "Davis", "Garcia", "Rodriguez", "Wilson", "Martinez"
+    };
+
+    private static final Random RANDOM = new Random(); // single Random instance
+
+    // Build a full name by choosing one first name and one last name randomly
+    public static String generateRandomName() {
+        String first = FIRST_NAMES[RANDOM.nextInt(FIRST_NAMES.length)]; // pick random first
+        String last = LAST_NAMES[RANDOM.nextInt(LAST_NAMES.length)];    // pick random last
+        return first + " " + last; // return combined full name
+    }
+}
+
 }
