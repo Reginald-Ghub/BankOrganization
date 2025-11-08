@@ -97,4 +97,67 @@ public class Department {
 }
 }
 
+// Abstract parent class representing a manager role.
+// Concrete roles extend this class: HeadManager, AssistantManager, TeamLead.
+public abstract class Manager {
+    protected int id;       // unique manager id (for registry)
+    protected String title; // title string used for display (e.g., "Head Manager")
+    protected String name;  // a name or descriptor (optional)
+    protected int level;    // numeric level useful for ordering (higher = more senior)
+
+    // Constructor for manager base class
+    public Manager(int id, String title, String name, int level) {
+        this.id = id;           // set id
+        this.title = title;     // set title
+        this.name = name;       // set name
+        this.level = level;     // set level
+    }
+
+    // Getter for id
+    public int getId() {
+        return id;
+    }
+
+    // Getter for title
+    public String getTitle() {
+        return title;
+    }
+
+    // Getter for name
+    public String getName() {
+        return name;
+    }
+
+    // Getter for level
+    public int getLevel() {
+        return level;
+    }
+
+    // toString returns the title for menu displays
+    @Override
+    public String toString() {
+        return title;
+    }
+}
+
+// Concrete manager subclass for Head Manager
+class HeadManager extends Manager {
+    public HeadManager(int id, String name) {
+        super(id, "Head Manager", name, 3); // level 3 for highest
+    }
+}
+
+// Concrete manager subclass for Assistant Manager
+class AssistantManager extends Manager {
+    public AssistantManager(int id, String name) {
+        super(id, "Assistant Manager", name, 2); // level 2
+    }
+}
+
+// Concrete manager subclass for Team Lead
+class TeamLead extends Manager {
+    public TeamLead(int id, String name) {
+        super(id, "Team Lead", name, 1); // level 1 for team lead
+    }
+}
 }
