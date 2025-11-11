@@ -17,283 +17,218 @@ import java.util.List;         // list interface
  */
 public class BankOrganization {
 
-// Enum representing the available menu options in the console program.
-// Using an enum enforces clear option names and makes menu code easier to maintain.   
-public enum MenuOption {
-    ADD_EMPLOYEE,        // Option to add a new employee manually
-    GENERATE_RANDOM,     // Option to generate random employees
-    SORT_APPLICANTS,     // Option to sort names from Applicants_Form.txt
-    SEARCH,              // Option to search for an employee by name
-    DISPLAY_ALL,         // Option to display all stored employees
-    EXIT                 // Option to exit the program
-}
+// Main class that runs the Bank Organization console application
+ 
 
-// Utility class that centralizes console input validation.
-// Keeping validation in one place simplifies Unit Testing and reuse.
-public class InputValidator {
+    // List to store all employees in memory
+    private static List<Employee> employees = new ArrayList<>();
+    private static Scanner scanner = new Scanner(System.in);
 
-    // Read a non-empty string from the scanner with a prompt
-    public static String readNonEmptyString(Scanner scanner, String prompt) {
-        // loop until a non-empty trimmed string is provided
-        while (true) {
-            System.out.print(prompt);               // show prompt to user
-            String input = scanner.nextLine().trim(); // read line and trim whitespace
-            if (!input.isEmpty()) {                 // valid when not empty
-                return input;                       // return valid input
-            } else {
-                System.out.println("Input cannot be empty. Please try again."); // error message
+    public static void main(String[] args) {
+        // Load applicants from file
+        loadApplicants("Applicants_Form.txt");
+
+        // Display menu until user exits
+        boolean running = true;
+        while (running) {
+            System.out.println("\n--- Bank Organization Menu ---");
+            int i = 1;
+            for (MenuOption option : MenuOption.values()) {
+                System.out.println(i + ". " + option);
+                i++;
+            }
+            int choice = InputValidator.readIntInRange(scanner, "Select an option: ", 1, MenuOption.values().length);
+            MenuOption selected = MenuOption.values()[choice - 1];
+
+            switch (selected) {
+                case ADD_EMPLOYEE -> addEmployee();
+                case GENERATE_RANDOM -> generateRandomEmployees();
+                case SORT_APPLICANTS -> sortApplicants();
+                case SEARCH -> searchEmployee();
+                case DISPLAY_ALL -> displayAllEmployees();
+                case EXIT -> {
+                    System.out.println("Exiting program. Goodbye!");
+                    running = false;
+                }
             }
         }
     }
 
-    // Read an integer within inclusive range [min, max], with a prompt
-    public static int readIntInRange(Scanner scanner, String prompt, int min, int max) {
-        // loop until a valid integer in the required range is obtained
-        while (true) {
-            System.out.print(prompt); // show prompt
-            String line = scanner.nextLine().trim(); // read as string
-            try {
-                int value = Integer.parseInt(line); // try parse int
-                if (value >= min && value <= max) { // check range
-                    return value;                   // valid, return
-                } else {
-                    // prompt again if outside range
-                    System.out.printf("Please enter a number between %d and %d.%n", min, max);
-                }
-            } catch (NumberFormatException e) {
-                // input not an integer
-                System.out.println("Invalid input. Please enter a valid number.");
-            }
-        }
-    }
-    
-    // Simple data class representing a bank department.
-public class Department {
-    private int id;           // unique id for the department
-    private String name;      // human-readable name (e.g., "Customer Service")
-    private String description; // short description of responsibilities
+    // Load applicants from a text file and add as employees with random managers & departments
+    private static void loadApplicants(String filename) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line;
+            int id = 1;
+            Random rand = new Random();
+            Department[] depts = {
+                    new Department(1, "Customer Service", ""),
+                    new Department(2, "Foreign Exchange", ""),
+                    new Department(3, "HR", ""),
+                    new Department(4, "Finance", ""),
+                    new Department(5, "IT", "")
+            };
 
-    // Constructor to initialize department fields
-    public Department(int id, String name, String description) {
-        this.id = id;                 // set id
-        this.name = name;             // set name
-        this.description = description; // set description
-    }
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (!line.isEmpty()) {
+                    // Random manager assignment
+                    Manager manager;
+                    int mgrChoice = rand.nextInt(3);
+                    if (mgrChoice == 0) manager = new HeadManager(id, "Manager " + id);
+                    else if (mgrChoice == 1) manager = new AssistantManager(id, "Manager " + id);
+                    else manager = new TeamLead(id, "Manager " + id);
 
-    // Getter for id
-    public int getId() {
-        return id;
-    }
+                    // Random department
+                    Department dept = depts[rand.nextInt(depts.length)];
 
-    // Getter for name
-    public String getName() {
-        return name;
-    }
-
-    // Getter for description
-    public String getDescription() {
-        return description;
-    }
-
-    // toString returns the department name for easy display
-    @Override
-    public String toString() {
-        return name;
-    }
-}
-}
-
-// Abstract parent class representing a manager role.
-// Concrete roles extend this class: HeadManager, AssistantManager, TeamLead.
-public abstract class Manager {
-    protected int id;       // unique manager id (for registry)
-    protected String title; // title string used for display (e.g., "Head Manager")
-    protected String name;  // a name or descriptor (optional)
-    protected int level;    // numeric level useful for ordering (higher = more senior)
-
-    // Constructor for manager base class
-    public Manager(int id, String title, String name, int level) {
-        this.id = id;           // set id
-        this.title = title;     // set title
-        this.name = name;       // set name
-        this.level = level;     // set level
-    }
-
-    // Getter for id
-    public int getId() {
-        return id;
-    }
-
-    // Getter for title
-    public String getTitle() {
-        return title;
-    }
-
-    // Getter for name
-    public String getName() {
-        return name;
-    }
-
-    // Getter for level
-    public int getLevel() {
-        return level;
-    }
-
-    // toString returns the title for menu displays
-    @Override
-    public String toString() {
-        return title;
-    }
-}
-
-// Concrete manager subclass for Head Manager
-class HeadManager extends Manager {
-    public HeadManager(int id, String name) {
-        super(id, "Head Manager", name, 3); // level 3 for highest
-    }
-}
-
-// Concrete manager subclass for Assistant Manager
-class AssistantManager extends Manager {
-    public AssistantManager(int id, String name) {
-        super(id, "Assistant Manager", name, 2); // level 2
-    }
-}
-
-// Concrete manager subclass for Team Lead
-class TeamLead extends Manager {
-    public TeamLead(int id, String name) {
-        super(id, "Team Lead", name, 1); // level 1 for team lead
-    }
-}
-// Employee class represents each staff member in the bank organization.
-// Each employee has an ID, name, assigned manager, and department.
-class Employee {
-    private int id;                  // unique ID for the employee
-    private String name;             // employee name
-    private Manager manager;         // assigned manager role (Head, Assistant, or Team Lead)
-    private InputValidator.Department department; // assigned department (nested from InputValidator)
-
-    // Constructor initializes all fields when creating an employee
-    public Employee(int id, String name, Manager manager, InputValidator.Department department) {
-        this.id = id;               // store employee ID
-        this.name = name;           // store employee name
-        this.manager = manager;     // store assigned manager type
-        this.department = department; // store assigned department
-    }
-
-    // Getter for employee ID
-    public int getId() {
-        return id;
-    }
-
-    // Getter for employee name
-    public String getName() {
-        return name;
-    }
-
-    // Getter for assigned manager
-    public Manager getManager() {
-        return manager;
-    }
-
-    // Getter for assigned department
-    public InputValidator.Department getDepartment() {
-        return department;
-    }
-
-    // Setter for employee name (in case of edits)
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    // Setter for manager role
-    public void setManager(Manager manager) {
-        this.manager = manager;
-    }
-
-    // Setter for department
-    public void setDepartment(InputValidator.Department department) {
-        this.department = department;
-    }
-
-    // toString method to return a readable employee summary for display
-    @Override
-    public String toString() {
-        return String.format("Employee ID: %d | Name: %s | Manager: %s | Department: %s",
-                id, name, manager.getTitle(), department.getName());
-    }
-}
-
-// Utility to generate random first and last name combinations.
-public class RandomNameGenerator {
-
-    // Small arrays of sample first and last names for generating test data
-    private static final String[] FIRST_NAMES = {
-            "John", "Jane", "Alice", "Bob", "Carol", "David", "Emma", "Frank",
-            "Grace", "Harry", "Ivy", "Jack", "Lily", "Mike", "Nina", "Oscar"
-    };
-
-    private static final String[] LAST_NAMES = {
-            "Smith", "Johnson", "Williams", "Brown", "Jones", "Miller",
-            "Davis", "Garcia", "Rodriguez", "Wilson", "Martinez"
-    };
-
-    private static final Random RANDOM = new Random(); // single Random instance
-
-    // Build a full name by choosing one first name and one last name randomly
-    public static String generateRandomName() {
-        String first = FIRST_NAMES[RANDOM.nextInt(FIRST_NAMES.length)]; // pick random first
-        String last = LAST_NAMES[RANDOM.nextInt(LAST_NAMES.length)];    // pick random last
-        return first + " " + last; // return combined full name
-    }
-}
-// Utility class for reading applicant file and performing merge-sort on strings.
-public class FileUtil {
-
-    // Read all non-empty trimmed lines from a file into a list of strings.
-    public static List<String> readLinesFromFile(String filename) {
-        List<String> lines = new ArrayList<>(); // result list
-        try (BufferedReader br = new BufferedReader(new FileReader(filename))) { // try-with-resources auto-closes
-            String line; // temporary storage for each read line
-            while ((line = br.readLine()) != null) { // read until EOF
-                if (!line.trim().isEmpty()) { // skip empty lines
-                    lines.add(line.trim()); // add trimmed line
+                    employees.add(new Employee(id, line, manager, dept));
+                    id++;
                 }
             }
+            System.out.println("Applicants loaded successfully. Total: " + employees.size());
         } catch (IOException e) {
-            // If file not found or other IO error occurs, inform the user
-            System.out.println("Error reading file: " + e.getMessage());
+            System.out.println("Error reading file: " + filename);
         }
-        return lines; // return possibly empty list
-    }
-    // Public method to perform merge sort on a list of String names
-    public static List<String> mergeSortNames(List<String> list) {
-        if (list.size() <= 1) { // base case: already sorted
-            return list;
-        }
-        int mid = list.size() / 2; // midpoint
-        // Recursively sort left half and right half
-        List<String> left = mergeSortNames(new ArrayList<>(list.subList(0, mid)));
-        List<String> right = mergeSortNames(new ArrayList<>(list.subList(mid, list.size())));
-        return merge(left, right); // merge sorted halves
     }
 
-    // Merge two sorted lists of strings into a single sorted list
-    private static List<String> merge(List<String> left, List<String> right) {
-        List<String> result = new ArrayList<>(); // merged result
-        int i = 0, j = 0; // indices for left and right lists
-        while (i < left.size() && j < right.size()) { // while both lists have elements
-            // case-insensitive comparison for alphabetical ordering
-            if (left.get(i).compareToIgnoreCase(right.get(j)) <= 0) {
-                result.add(left.get(i++)); // append left element then increment i
+    // Display all employees
+    private static void displayAllEmployees() {
+        System.out.println("\n--- All Employees ---");
+        for (Employee emp : employees) {
+            System.out.println(emp);
+        }
+    }
+
+    // Add a new employee manually
+    private static void addEmployee() {
+        System.out.println("\n--- Add New Employee ---");
+        int id = employees.size() + 1;
+        String name = InputValidator.readNonEmptyString(scanner, "Enter employee name: ");
+
+        System.out.println("Select Manager Type: 1. Head Manager 2. Assistant Manager 3. Team Lead");
+        int mgrChoice = InputValidator.readIntInRange(scanner, "Choice: ", 1, 3);
+        Manager manager;
+        switch (mgrChoice) {
+            case 1:
+                manager = new HeadManager(id, "Manager " + id);
+                break;
+            case 2:
+                manager = new AssistantManager(id, "Manager " + id);
+                break;
+            default:
+                manager = new TeamLead(id, "Manager " + id);
+                break;
+        }
+
+        System.out.println("Select Department: 1. Customer Service 2. Foreign Exchange 3. HR 4. Finance 5. IT");
+        int deptChoice = InputValidator.readIntInRange(scanner, "Choice: ", 1, 5);
+        Department dept;
+        switch (deptChoice) {
+            case 1 -> dept = new Department(1, "Customer Service", "");
+            case 2 -> dept = new Department(2, "Foreign Exchange", "");
+            case 3 -> dept = new Department(3, "HR", "");
+            case 4 -> dept = new Department(4, "Finance", "");
+            default -> dept = new Department(5, "IT", "");
+        }
+
+        employees.add(new Employee(id, name, manager, dept));
+        System.out.println("Employee added successfully!");
+    }
+
+    // Generate random employees
+    private static void generateRandomEmployees() {
+        System.out.println("\n--- Generate Random Employees ---");
+        System.out.print("How many random employees to generate? ");
+        int n = InputValidator.readIntInRange(scanner, "", 1, 100);
+        Random rand = new Random();
+        Department[] depts = {
+                new Department(1, "Customer Service", ""),
+                new Department(2, "Foreign Exchange", ""),
+                new Department(3, "HR", ""),
+                new Department(4, "Finance", ""),
+                new Department(5, "IT", "")
+        };
+
+        for (int i = 0; i < n; i++) {
+            int id = employees.size() + 1;
+            String name = "Employee" + id;
+
+            Manager manager;
+            int mgrChoice = rand.nextInt(3);
+            if (mgrChoice == 0) manager = new HeadManager(id, "Manager " + id);
+            else if (mgrChoice == 1) manager = new AssistantManager(id, "Manager " + id);
+            else manager = new TeamLead(id, "Manager " + id);
+
+            Department dept = depts[rand.nextInt(depts.length)];
+            employees.add(new Employee(id, name, manager, dept));
+        }
+        System.out.println(n + " random employees generated successfully!");
+    }
+
+    // Sort applicants alphabetically using recursive Merge Sort
+    private static void sortApplicants() {
+        System.out.println("\n--- Sorting Applicants ---");
+        mergeSort(employees, 0, employees.size() - 1);
+        System.out.println("Top 20 employees (alphabetical):");
+        for (int i = 0; i < Math.min(20, employees.size()); i++) {
+            System.out.println(employees.get(i).getName());
+        }
+    }
+
+    // Merge Sort implementation for Employee list by name
+    private static void mergeSort(List<Employee> list, int left, int right) {
+        if (left < right) {
+            int mid = (left + right) / 2;
+            mergeSort(list, left, mid);
+            mergeSort(list, mid + 1, right);
+            merge(list, left, mid, right);
+        }
+    }
+
+    private static void merge(List<Employee> list, int left, int mid, int right) {
+        List<Employee> temp = new ArrayList<>();
+        int i = left, j = mid + 1;
+        while (i <= mid && j <= right) {
+            if (list.get(i).getName().compareToIgnoreCase(list.get(j).getName()) <= 0) {
+                temp.add(list.get(i++));
             } else {
-                result.add(right.get(j++)); // append right element then increment j
+                temp.add(list.get(j++));
             }
         }
-        while (i < left.size()) result.add(left.get(i++)); // append remaining left
-        while (j < right.size()) result.add(right.get(j++)); // append remaining right
-        return result; // return merged list
+        while (i <= mid) temp.add(list.get(i++));
+        while (j <= right) temp.add(list.get(j++));
+        for (int k = 0; k < temp.size(); k++) {
+            list.set(left + k, temp.get(k));
+        }
     }
-}
+
+    // Search employee by name using Binary Search
+    private static void searchEmployee() {
+        System.out.println("\n--- Search Employee ---");
+        System.out.print("Enter name to search: ");
+        String target = scanner.nextLine().trim();
+
+        // Ensure list is sorted before binary search
+        mergeSort(employees, 0, employees.size() - 1);
+
+        int index = binarySearch(employees, target);
+        if (index >= 0) {
+            System.out.println("Employee found: " + employees.get(index));
+        } else {
+            System.out.println("Employee not found.");
+        }
+    }
+
+    // Binary search for employee by name
+    private static int binarySearch(List<Employee> list, String target) {
+        int left = 0, right = list.size() - 1;
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            int cmp = list.get(mid).getName().compareToIgnoreCase(target);
+            if (cmp == 0) return mid;
+            else if (cmp < 0) left = mid + 1;
+            else right = mid - 1;
+        }
+        return -1;
+    }
 }
