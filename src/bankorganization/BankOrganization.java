@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
 package bankorganization;
+import bankorganization.MainMenu.MenuOption;
 import java.util.Scanner; // Scanner used for console input
 import java.util.Random; // Random used to pick names
 import java.io.BufferedReader; // for efficient file reading
@@ -21,8 +22,8 @@ public class BankOrganization {
  
 
     // List to store all employees in memory
-    private static List<Employee> employees = new ArrayList<>();
-    private static Scanner scanner = new Scanner(System.in);
+    private static final List<Employee> employees = new ArrayList<>();
+    private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         // Load applicants from file
@@ -43,7 +44,7 @@ public class BankOrganization {
             switch (selected) {
                 case ADD_EMPLOYEE -> addEmployee();
                 case GENERATE_RANDOM -> generateRandomEmployees();
-                case SORT_APPLICANTS -> sortApplicants();
+                case SORT_APPLICANTS -> sortApplicants(scanner);
                 case SEARCH -> searchEmployee();
                 case DISPLAY_ALL -> displayAllEmployees();
                 case EXIT -> {
@@ -74,9 +75,11 @@ public class BankOrganization {
                     // Random manager assignment
                     Manager manager;
                     int mgrChoice = rand.nextInt(3);
-                    if (mgrChoice == 0) manager = new HeadManager(id, "Manager " + id);
-                    else if (mgrChoice == 1) manager = new AssistantManager(id, "Manager " + id);
-                    else manager = new TeamLead(id, "Manager " + id);
+                    manager = switch (mgrChoice) {
+                        case 0 -> new HeadManager(id, "Manager " + id);
+                        case 1 -> new AssistantManager(id, "Manager " + id);
+                        default -> new TeamLead(id, "Manager " + id);
+                    };
 
                     // Random department
                     Department dept = depts[rand.nextInt(depts.length)];
@@ -108,17 +111,11 @@ public class BankOrganization {
         System.out.println("Select Manager Type: 1. Head Manager 2. Assistant Manager 3. Team Lead");
         int mgrChoice = InputValidator.readIntInRange(scanner, "Choice: ", 1, 3);
         Manager manager;
-        switch (mgrChoice) {
-            case 1:
-                manager = new HeadManager(id, "Manager " + id);
-                break;
-            case 2:
-                manager = new AssistantManager(id, "Manager " + id);
-                break;
-            default:
-                manager = new TeamLead(id, "Manager " + id);
-                break;
-        }
+        manager = switch (mgrChoice) {
+            case 1 -> new HeadManager(id, "Manager " + id);
+            case 2 -> new AssistantManager(id, "Manager " + id);
+            default -> new TeamLead(id, "Manager " + id);
+        };
 
         System.out.println("Select Department: 1. Customer Service 2. Foreign Exchange 3. HR 4. Finance 5. IT");
         int deptChoice = InputValidator.readIntInRange(scanner, "Choice: ", 1, 5);
@@ -155,9 +152,11 @@ public class BankOrganization {
 
             Manager manager;
             int mgrChoice = rand.nextInt(3);
-            if (mgrChoice == 0) manager = new HeadManager(id, "Manager " + id);
-            else if (mgrChoice == 1) manager = new AssistantManager(id, "Manager " + id);
-            else manager = new TeamLead(id, "Manager " + id);
+            manager = switch (mgrChoice) {
+                case 0 -> new HeadManager(id, "Manager " + id);
+                case 1 -> new AssistantManager(id, "Manager " + id);
+                default -> new TeamLead(id, "Manager " + id);
+            };
 
             Department dept = depts[rand.nextInt(depts.length)];
             employees.add(new Employee(id, name, manager, dept));
@@ -166,7 +165,7 @@ public class BankOrganization {
     }
 
     // Sort applicants alphabetically using recursive Merge Sort
-    private static void sortApplicants() {
+    static void sortApplicants(Scanner scanner1) {
         System.out.println("\n--- Sorting Applicants ---");
         mergeSort(employees, 0, employees.size() - 1);
         System.out.println("Top 20 employees (alphabetical):");
@@ -230,5 +229,17 @@ public class BankOrganization {
             else right = mid - 1;
         }
         return -1;
+    }
+
+    void searchApplicant(Scanner scanner) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    void addApplicant(Scanner scanner) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    void generateRandomApplicants() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

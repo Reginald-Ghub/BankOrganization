@@ -43,9 +43,9 @@ class InputValidator {
 
     // Department class can also be top-level if you want
     public static class Department {
-        private int id;
-        private String name;
-        private String description;
+        private final int id;
+        private final String name;
+        private final String description;
 
         public Department(int id, String name, String description) {
             this.id = id;

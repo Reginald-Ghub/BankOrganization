@@ -12,7 +12,7 @@ public class Employee {
 
 // Represents an employee in the bank
 
-    private int id;                  // Unique ID
+    private final int id;                  // Unique ID
     private String name;             // Employee name
     private Manager manager;         // Manager assigned
     private Department department;   // Department assigned

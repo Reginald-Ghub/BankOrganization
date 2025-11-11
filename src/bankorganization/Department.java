@@ -10,9 +10,9 @@ package bankorganization;
  */
 public class Department { // Represents a bank department
 
-    private int id;             // Unique department ID
-    private String name;        // Department name (e.g., "HR")
-    private String description; // Optional description
+    private final int id;             // Unique department ID
+    private final String name;        // Department name (e.g., "HR")
+    private final String description; // Optional description
 
     // Constructor
     public Department(int id, String name, String description) {
