@@ -5,6 +5,11 @@
 package bankorganization;
 import java.util.Scanner; // Scanner used for console input
 import java.util.Random; // Random used to pick names
+import java.io.BufferedReader; // for efficient file reading
+import java.io.FileReader;     // to open the file
+import java.io.IOException;    // for handling IO errors
+import java.util.ArrayList;    // list implementation
+import java.util.List;         // list interface
 
 /**
  *
@@ -243,5 +248,52 @@ public class RandomNameGenerator {
         return first + " " + last; // return combined full name
     }
 }
+// Utility class for reading applicant file and performing merge-sort on strings.
+public class FileUtil {
 
+    // Read all non-empty trimmed lines from a file into a list of strings.
+    public static List<String> readLinesFromFile(String filename) {
+        List<String> lines = new ArrayList<>(); // result list
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) { // try-with-resources auto-closes
+            String line; // temporary storage for each read line
+            while ((line = br.readLine()) != null) { // read until EOF
+                if (!line.trim().isEmpty()) { // skip empty lines
+                    lines.add(line.trim()); // add trimmed line
+                }
+            }
+        } catch (IOException e) {
+            // If file not found or other IO error occurs, inform the user
+            System.out.println("Error reading file: " + e.getMessage());
+        }
+        return lines; // return possibly empty list
+    }
+    // Public method to perform merge sort on a list of String names
+    public static List<String> mergeSortNames(List<String> list) {
+        if (list.size() <= 1) { // base case: already sorted
+            return list;
+        }
+        int mid = list.size() / 2; // midpoint
+        // Recursively sort left half and right half
+        List<String> left = mergeSortNames(new ArrayList<>(list.subList(0, mid)));
+        List<String> right = mergeSortNames(new ArrayList<>(list.subList(mid, list.size())));
+        return merge(left, right); // merge sorted halves
+    }
+
+    // Merge two sorted lists of strings into a single sorted list
+    private static List<String> merge(List<String> left, List<String> right) {
+        List<String> result = new ArrayList<>(); // merged result
+        int i = 0, j = 0; // indices for left and right lists
+        while (i < left.size() && j < right.size()) { // while both lists have elements
+            // case-insensitive comparison for alphabetical ordering
+            if (left.get(i).compareToIgnoreCase(right.get(j)) <= 0) {
+                result.add(left.get(i++)); // append left element then increment i
+            } else {
+                result.add(right.get(j++)); // append right element then increment j
+            }
+        }
+        while (i < left.size()) result.add(left.get(i++)); // append remaining left
+        while (j < right.size()) result.add(right.get(j++)); // append remaining right
+        return result; // return merged list
+    }
+}
 }
