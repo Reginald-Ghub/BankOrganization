@@ -18,29 +18,35 @@ import java.util.List;         // list interface
  */
 public class BankOrganization {
 
-// Main class that runs the Bank Organization console application
+// This class represents the main program for the Bank Organization system.
+    // It loads applicants, lets the user add employees, sort/search employees,
+    // and generates random employees for testing.
  
 
     // List to store all employees in memory
     private static final List<Employee> employees = new ArrayList<>();
-    private static final Scanner scanner = new Scanner(System.in);
+    private static final Scanner scanner = new Scanner(System.in); // Scanner object used for reading keyboard input
 
     public static void main(String[] args) {
-        // Load applicants from file
+        // Load applicant names from a text file when the program starts
         loadApplicants("Applicants_Form.txt");
 
         // Display menu until user exits
-        boolean running = true;
+        boolean running = true; // Controls the main menu loop
+        // Loop until the user chooses "EXIT"
         while (running) {
-            System.out.println("\n--- Bank Organization Menu ---");
+            System.out.println("\n--- Bank Organization Menu ---");           
+            // Display all options from the MenuOption enum
             int i = 1;
             for (MenuOption option : MenuOption.values()) {
                 System.out.println(i + ". " + option);
                 i++;
             }
+            // Ask user for a valid menu option numbe
             int choice = InputValidator.readIntInRange(scanner, "Select an option: ", 1, MenuOption.values().length);
             MenuOption selected = MenuOption.values()[choice - 1];
 
+            // Perform action based on the selected menu option
             switch (selected) {
                 case ADD_EMPLOYEE -> addEmployee();
                 case GENERATE_RANDOM -> generateRandomEmployees();
@@ -59,18 +65,19 @@ public class BankOrganization {
     private static void loadApplicants(String filename) {
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String line;
-            int id = 1;
+            int id = 1; // Employee ID counter
             Random rand = new Random();
-            Department[] depts = {
+            Department[] depts = { // Predefined list of departments
                     new Department(1, "Customer Service", ""),
                     new Department(2, "Foreign Exchange", ""),
                     new Department(3, "HR", ""),
                     new Department(4, "Finance", ""),
                     new Department(5, "IT", "")
             };
-
+            // Read each line (each applicant name)
             while ((line = br.readLine()) != null) {
                 line = line.trim();
+                // Skip empty lines
                 if (!line.isEmpty()) {
                     // Random manager assignment
                     Manager manager;
@@ -83,7 +90,7 @@ public class BankOrganization {
 
                     // Random department
                     Department dept = depts[rand.nextInt(depts.length)];
-
+                    // Create a new employee and add to list
                     employees.add(new Employee(id, line, manager, dept));
                     id++;
                 }
@@ -94,7 +101,7 @@ public class BankOrganization {
         }
     }
 
-    // Display all employees
+    // Display all employees in the list
     private static void displayAllEmployees() {
         System.out.println("\n--- All Employees ---");
         for (Employee emp : employees) {
@@ -102,12 +109,13 @@ public class BankOrganization {
         }
     }
 
-    // Add a new employee manually
+    // Allows user to manually add one employee by typing
+    // name, choosing manager type, and choosing a department.
     private static void addEmployee() {
         System.out.println("\n--- Add New Employee ---");
         int id = employees.size() + 1;
         String name = InputValidator.readNonEmptyString(scanner, "Enter employee name: ");
-
+        // Choose manager type
         System.out.println("Select Manager Type: 1. Head Manager 2. Assistant Manager 3. Team Lead");
         int mgrChoice = InputValidator.readIntInRange(scanner, "Choice: ", 1, 3);
         Manager manager;
@@ -116,7 +124,7 @@ public class BankOrganization {
             case 2 -> new AssistantManager(id, "Manager " + id);
             default -> new TeamLead(id, "Manager " + id);
         };
-
+        // Choose department
         System.out.println("Select Department: 1. Customer Service 2. Foreign Exchange 3. HR 4. Finance 5. IT");
         int deptChoice = InputValidator.readIntInRange(scanner, "Choice: ", 1, 5);
         Department dept;
@@ -127,42 +135,53 @@ public class BankOrganization {
             case 4 -> dept = new Department(4, "Finance", "");
             default -> dept = new Department(5, "IT", "");
         }
-
+        // Add new employee to list
         employees.add(new Employee(id, name, manager, dept));
         System.out.println("Employee added successfully!");
     }
 
-    // Generate random employees
+    // Generates a number of random employees using random
+    // names from Applicants_Form.txt.
     private static void generateRandomEmployees() {
-        System.out.println("\n--- Generate Random Employees ---");
-        System.out.print("How many random employees to generate? ");
-        int n = InputValidator.readIntInRange(scanner, "", 1, 100);
-        Random rand = new Random();
-        Department[] depts = {
-                new Department(1, "Customer Service", ""),
-                new Department(2, "Foreign Exchange", ""),
-                new Department(3, "HR", ""),
-                new Department(4, "Finance", ""),
-                new Department(5, "IT", "")
+    System.out.println("\n--- Generate Random Employees ---");
+    System.out.print("How many random employees to generate? ");
+    int n = InputValidator.readIntInRange(scanner, "", 1, 100);
+
+    // Load names from Applicants_Form.txt
+    List<String> names = loadNamesFromFile("Applicants_Form.txt");
+    if (names.isEmpty()) {
+        System.out.println("No names found in Applicants_Form.txt. Please check the file.");
+        return;
+    }
+
+    Random rand = new Random();
+    Department[] depts = {
+        new Department(1, "Customer Service", ""),
+        new Department(2, "Foreign Exchange", ""),
+        new Department(3, "HR", ""),
+        new Department(4, "Finance", ""),
+        new Department(5, "IT", "")
+    };
+    // Create random employees
+    for (int i = 0; i < n; i++) {
+        int id = employees.size() + 1;
+        String name = names.get(rand.nextInt(names.size())); // pick random name from file
+
+        Manager manager;
+        int mgrChoice = rand.nextInt(3); // Random manager type
+        manager = switch (mgrChoice) {
+            case 0 -> new HeadManager(id, "Manager " + id);
+            case 1 -> new AssistantManager(id, "Manager " + id);
+            default -> new TeamLead(id, "Manager " + id);
         };
 
-        for (int i = 0; i < n; i++) {
-            int id = employees.size() + 1;
-            String name = "Employee" + id;
-
-            Manager manager;
-            int mgrChoice = rand.nextInt(3);
-            manager = switch (mgrChoice) {
-                case 0 -> new HeadManager(id, "Manager " + id);
-                case 1 -> new AssistantManager(id, "Manager " + id);
-                default -> new TeamLead(id, "Manager " + id);
-            };
-
-            Department dept = depts[rand.nextInt(depts.length)];
-            employees.add(new Employee(id, name, manager, dept));
-        }
-        System.out.println(n + " random employees generated successfully!");
+        Department dept = depts[rand.nextInt(depts.length)]; // Random department
+        employees.add(new Employee(id, name, manager, dept));
     }
+
+    System.out.println(n + " random employees generated successfully!");
+}
+
 
     // Sort applicants alphabetically using recursive Merge Sort
     static void sortApplicants(Scanner scanner1) {
@@ -174,19 +193,20 @@ public class BankOrganization {
         }
     }
 
-    // Merge Sort implementation for Employee list by name
+    // Recursive merge sort algorithm
     private static void mergeSort(List<Employee> list, int left, int right) {
         if (left < right) {
             int mid = (left + right) / 2;
-            mergeSort(list, left, mid);
-            mergeSort(list, mid + 1, right);
-            merge(list, left, mid, right);
+            mergeSort(list, left, mid); // Sort left half
+            mergeSort(list, mid + 1, right); // Sort right half
+            merge(list, left, mid, right); // Combine sorted halves
         }
     }
-
+    // Merge two sorted halves
     private static void merge(List<Employee> list, int left, int mid, int right) {
         List<Employee> temp = new ArrayList<>();
         int i = left, j = mid + 1;
+        // Merge based on alphabetical name comparison
         while (i <= mid && j <= right) {
             if (list.get(i).getName().compareToIgnoreCase(list.get(j).getName()) <= 0) {
                 temp.add(list.get(i++));
@@ -194,14 +214,18 @@ public class BankOrganization {
                 temp.add(list.get(j++));
             }
         }
+        // Add remaining left half
         while (i <= mid) temp.add(list.get(i++));
+        // Add remaining right half
         while (j <= right) temp.add(list.get(j++));
+        // Copy back into original list
         for (int k = 0; k < temp.size(); k++) {
             list.set(left + k, temp.get(k));
         }
     }
 
-    // Search employee by name using Binary Search
+    // Search for an employee by name using binary search.
+    // List must be sorted first.
     private static void searchEmployee() {
         System.out.println("\n--- Search Employee ---");
         System.out.print("Enter name to search: ");
@@ -218,28 +242,40 @@ public class BankOrganization {
         }
     }
 
-    // Binary search for employee by name
+    // Standard binary search algorithm
     private static int binarySearch(List<Employee> list, String target) {
         int left = 0, right = list.size() - 1;
         while (left <= right) {
             int mid = (left + right) / 2;
             int cmp = list.get(mid).getName().compareToIgnoreCase(target);
-            if (cmp == 0) return mid;
-            else if (cmp < 0) left = mid + 1;
-            else right = mid - 1;
+            if (cmp == 0) return mid; // Found match
+            else if (cmp < 0) left = mid + 1; // Search right side
+            else right = mid - 1; // Search left side
         }
         return -1;
     }
-
-    void searchApplicant(Scanner scanner) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    // Helper method to load names from Applicants_Form.txt into a List
+private static List<String> loadNamesFromFile(String filename) {
+    List<String> names = new ArrayList<>();
+    try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (!line.isEmpty()) {
+                names.add(line);
+            }
+        }
+    } catch (IOException e) {
+        System.out.println("Error loading names from file: " + filename);
     }
-
-    void addApplicant(Scanner scanner) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    return names;
+}
+    // Not implemented placeholders
+    void searchApplicant(Scanner scanner) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     void generateRandomApplicants() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
